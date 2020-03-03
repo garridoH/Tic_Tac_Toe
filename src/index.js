@@ -107,15 +107,17 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+
+    handleClick() {
+        window.location.reload();
+    }
+
   render() {
     return (
       <Grid className="game">
         <div className="game-board">
           <Board />
-        </div>
-        <div className="game-info">
-          <div>{/* status */}</div>
-          <ol>{/* TODO */}</ol>
+          <button onClick={() => this.handleClick()} >Restart Game</button>
         </div>
       </Grid>
     );
