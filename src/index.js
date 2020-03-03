@@ -69,15 +69,16 @@ class Board extends React.Component {
 
     render() {
         const winner = calculateWinner(this.state.squareMatrix);
+        const description = winner.length > 1 ? this.state.squareMatrix[winner[0]] : winner[0];
         let status;
 
-        switch (this.state.squareMatrix[winner[0]]) {
+        switch (description) {
             case 'X':
             case 'O':
             status = 'Player ' + this.state.squareMatrix[winner[0]] + ' Wins The Game!!';
                 break;
             case 'GameOver':
-            status = "No Winner This Round!!";
+            status = "It's a draw!!";
                 break;
             default:
             status = 'Next player up: ' + (this.state.xIsNext ? 'X' : 'O');
