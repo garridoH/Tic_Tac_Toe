@@ -1,12 +1,34 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
+import styled from "styled-components";
+
+
+const Grid = styled.div`
+  width: 300px;
+  height: 300px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+`;
+const Button = styled.button`
+    float: left;
+    font-weight: bold;
+    height: 70px;
+    padding: 0;
+    text-align: center;
+    width: 70px;
+    font-size: 50px;
+`;
 
 function Square(props) {
     return (
-        <button className="square" onClick={props.onClick}>
+        <Button className="square" onClick={props.onClick} 
+        style={props.winnnerLocation?{backgroundColor:'green'}:{backgroundColor:'white'}}
+        >
             {props.value}
-        </button>
+        </Button>
 
     );
 }
@@ -22,7 +44,7 @@ class Board extends React.Component {
 
     handleClick(i) {
         const squares = this.state.squareMatrix.slice();
-        if (calculateWinner(squares) || squares[i]) {
+        if (calculateWinner(squares)[0] !== 'Continue' || squares[i]) {
             return;
         }
         squares[i] = this.state.xIsNext ? 'X': 'O';
@@ -32,18 +54,32 @@ class Board extends React.Component {
          });
     }
 
-    renderSquare(i) {
+    renderSquare(index, isHighlighted) {
         return <Square
-            value={this.state.squareMatrix[i]}
-            onClick={() => this.handleClick(i)} />;
+            value={this.state.squareMatrix[index]}
+            onClick={() => this.handleClick(index)}
+            winnnerLocation={isHighlighted} />;
+    }
+
+    checkWinningSquare(winner, index) {
+            return winner.some(function(el) {
+                return el === index;
+            });
     }
 
     render() {
         const winner = calculateWinner(this.state.squareMatrix);
         let status;
-        if (winner) {
-            status = 'Winner, Winner, Chicken Dinner. Player ' + winner + ' Wins The Game!!';
-        } else {
+
+        switch (this.state.squareMatrix[winner[0]]) {
+            case 'X':
+            case 'O':
+            status = 'Player ' + this.state.squareMatrix[winner[0]] + ' Wins The Game!!';
+                break;
+            case 'GameOver':
+            status = "No Winner This Round!!";
+                break;
+            default:
             status = 'Next player up: ' + (this.state.xIsNext ? 'X' : 'O');
         }
 
@@ -51,19 +87,19 @@ class Board extends React.Component {
             <div>
                 <div className="status">{status}</div>
                 <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
+                    {this.renderSquare(0, this.checkWinningSquare(winner, 0))}
+                    {this.renderSquare(1, this.checkWinningSquare(winner, 1))}
+                    {this.renderSquare(2, this.checkWinningSquare(winner, 2))}
                 </div>
                 <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
+                    {this.renderSquare(3, this.checkWinningSquare(winner, 3))}
+                    {this.renderSquare(4, this.checkWinningSquare(winner, 4))}
+                    {this.renderSquare(5, this.checkWinningSquare(winner, 5))}
                 </div>
                 <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
+                    {this.renderSquare(6, this.checkWinningSquare(winner, 6))}
+                    {this.renderSquare(7, this.checkWinningSquare(winner, 7))}
+                    {this.renderSquare(8, this.checkWinningSquare(winner, 8))}
                 </div>
             </div>
         );
@@ -73,7 +109,7 @@ class Board extends React.Component {
 class Game extends React.Component {
   render() {
     return (
-      <div className="game">
+      <Grid className="game">
         <div className="game-board">
           <Board />
         </div>
@@ -81,7 +117,7 @@ class Game extends React.Component {
           <div>{/* status */}</div>
           <ol>{/* TODO */}</ol>
         </div>
-      </div>
+      </Grid>
     );
   }
 }
@@ -98,14 +134,21 @@ function calculateWinner(squares) {
         [2, 4, 6],
     ];
 
+    let isWinner = false;
+
     for (let i=0; i < winningLinePermutations.length; i++){
         // defines the winning permutation
         const [a, b, c]= winningLinePermutations[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            isWinner = true;
+            return [a, b, c];
         }
     }
-    return null;
+    const hasNulls = squares.some(function(el) {
+        return el === null;
+    });
+
+    return !hasNulls && !isWinner ? ['GameOver'] : ['Continue'];
 }
 
 ReactDOM.render(
